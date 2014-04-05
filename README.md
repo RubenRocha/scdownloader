@@ -3,6 +3,10 @@ scdownloader
 
 Soundcloud downloader, supporting playlists and usernames.
 
+Please remember to edit the client_id in `sc.py`.
+You can achieve this by opening the network tab of your browser, and performing pretty much any action, like clicking play on a song. You will get something similar to this, with one of the parameters being client_id.
+![client_id demonstration](http://i.imgur.com/aQTOPYi.png "Demonstration")
+
 
 usage
 =====
