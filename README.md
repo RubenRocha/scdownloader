@@ -1,7 +1,7 @@
 scdownloader
 ============
 
-Soundcloud downloader, supporting playlists and usernames.
+Soundcloud downloader, supporting playlists and usernames, and also metadata downloading with the `-m` switch.
 
 Please remember to edit the client_id in `sc.py`.
 You can achieve this by opening the network tab of your browser, and performing pretty much any action, like clicking play on a song. You will get something similar to this, with one of the parameters being client_id.
@@ -22,6 +22,10 @@ usage
 `./sc.py -p https://soundcloud.com/user146407550/sets/drum-and-bass`
 
   Gets tracks from playlist `drum-and-bass` by user `user146407550`
+  
+`./sc.py -m -u christchilds`
+
+  Gets tracks for user `christchilds` also downloading the metadata.
     
     
 sample output
