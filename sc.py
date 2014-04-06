@@ -1,4 +1,4 @@
-import urllib, json, string, sys, argparse
+import urllib, json, string, sys, argparse, cStringIO
 
 valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
 sound_list = []
@@ -12,7 +12,14 @@ def resolveTrack(url):
 	f = urllib.urlopen(link)
 	response = f.read()
 	result_json = json.loads(response)
-	return {'title': result_json['title'].encode(sys.stdout.encoding, errors='replace'), 'streamURL': result_json['stream_url'], 'user': result_json['user']['username'].encode(sys.stdout.encoding, errors='replace')}
+	return {
+	'title': result_json['title'].encode(sys.stdout.encoding, errors='replace'), 
+	'streamURL': result_json['stream_url'], 
+	'user': result_json['user']['username'].encode(sys.stdout.encoding, errors='replace'), 
+	'albumart': result_json['artwork_url'], 
+	'genre': result_json['genre'], 
+	'bpm': result_json['bpm']
+	}
 	
 def getTracks(username):
 	try:
@@ -51,6 +58,33 @@ def prepareTracks(result):
 			for y in download.split(","):
 				downloadTrack(y)
 
+				
+
+def getMetadata(data, filename):
+	try:
+		import eyed3
+		import eyed3.id3
+		data = sound_list[int(data)]
+
+		audiofile = eyed3.core.load(filename)
+		audiofile.tag = eyed3.id3.Tag()
+		audiofile.tag.artist = unicode(data['user'])
+		audiofile.tag.title = unicode(data['title'])
+		audiofile.tag.genre = unicode(data['genre'])
+		if not data['bpm'] == None: 
+			audiofile.tag.bpm = unicode(data['bpm'])
+		if not data['albumart'] == None:
+			img_filename = filename.split(".mp3")[0] + ".jpg"
+			urllib.urlretrieve (data['albumart'], img_filename)
+			img_data = open(img_filename,"rb").read()
+			audiofile.tag.images.set(3,img_data,"image/jpeg",u"Cover")
+		audiofile.tag.save(filename)
+		
+	except Exception as e:
+		pass
+	
+
+
 def dlProgress(count, blockSize, totalSize):
       percent = int(count*blockSize*100/totalSize)
       sys.stdout.write("[" + "#"*(percent/10) + " "*(10 - (percent/10)) + "] %2d%%" % percent)
@@ -63,7 +97,10 @@ def downloadTrack(info):
 	try:
 		url = sound_list[int(info)]['streamURL'] + "?client_id=" + client_id
 		sys.stdout.write("Downloading " + name + "... ")    
-		urllib.urlretrieve (url, ''.join(c for c in name if c in valid_chars) + ".mp3", reporthook=dlProgress)
+		filename = ''.join(c for c in name if c in valid_chars) + ".mp3"
+		urllib.urlretrieve (url, filename, reporthook=dlProgress)
+		if args.m == True:
+			getMetadata(info, filename)
 	except Exception, e:
 		print "\nError downloading file [" + name + "]!" + str(e)
 		pass
@@ -85,6 +122,8 @@ parser.add_argument('-u', metavar='username', type=str,
                    help='A username to get the tracks of.')
 parser.add_argument('-p', metavar='playlist', type=str,
                    help='A playlist URL to get the tracks of.')
+parser.add_argument('-m', action='store_true',
+                   help='Enables fetching metadata (requires eyed3 module)')
 args = parser.parse_args()
 
 if args.u:
