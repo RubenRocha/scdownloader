@@ -68,9 +68,13 @@ def getMetadata(data, filename):
 
 		audiofile = eyed3.core.load(filename)
 		audiofile.tag = eyed3.id3.Tag()
-		audiofile.tag.artist = unicode(data['user'])
-		audiofile.tag.title = unicode(data['title'])
-		audiofile.tag.genre = unicode(data['genre'])
+		print data['albumart']
+		if not data['user'] == None: 
+			audiofile.tag.artist = unicode(data['user'])
+		if not data['title'] == None: 
+			audiofile.tag.title = unicode(data['title'])
+		if not data['genre'] == None: 
+			audiofile.tag.genre = unicode(data['genre'])
 		if not data['bpm'] == None: 
 			audiofile.tag.bpm = unicode(data['bpm'])
 		if not data['albumart'] == None:
